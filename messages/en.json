@@ -132,7 +132,16 @@
     "no_orders": "No orders yet",
     "reorder": "Order again",
     "cancel_order": "Cancel order",
-    "back_home": "Back to home"
+    "back_home": "Back to home",
+    "tracking_title": "Track order",
+    "step_confirmed": "Confirmed",
+    "live_badge": "Live",
+    "connecting": "Connecting…",
+    "contact_restaurant": "Contact restaurant",
+    "items_ordered": "Items ordered",
+    "cancelled_title": "Order cancelled",
+    "cancelled_subtitle": "This order has been cancelled",
+    "coming_soon_contact": "Coming soon"
   },
   "merchant": {
     "dashboard_title": "Dashboard",

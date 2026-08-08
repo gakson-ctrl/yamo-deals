@@ -3,7 +3,7 @@ import { Sora, Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 
-import { IconSprite } from '@/components/IconSprite';
+import IconSprite from '@/components/IconSprite';
 import { DemoBadge } from '@/components/shared/DemoBadge';
 import { QueryProvider } from '@/components/shared/Providers';
 import './globals.css';

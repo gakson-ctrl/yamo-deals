@@ -132,7 +132,16 @@
     "no_orders": "Aucune commande pour le moment",
     "reorder": "Commander à nouveau",
     "cancel_order": "Annuler la commande",
-    "back_home": "Retour à l'accueil"
+    "back_home": "Retour à l'accueil",
+    "tracking_title": "Suivi de commande",
+    "step_confirmed": "Confirmée",
+    "live_badge": "En direct",
+    "connecting": "Connexion…",
+    "contact_restaurant": "Contacter le restaurant",
+    "items_ordered": "Articles commandés",
+    "cancelled_title": "Commande annulée",
+    "cancelled_subtitle": "Cette commande a été annulée",
+    "coming_soon_contact": "Bientôt disponible"
   },
   "merchant": {
     "dashboard_title": "Tableau de bord",

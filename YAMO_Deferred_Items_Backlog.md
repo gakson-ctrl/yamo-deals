@@ -63,6 +63,10 @@
 | Y-027 | Order confirmation ETA hardcoded ("20–30 min") | Technical debt | S3 | Should compute from restaurant avg_prep_time + delivery estimate |
 | Y-028 | CartDrawer localStorage persistence excludes isDrawerOpen | Known limitation | S3 | Intentional — drawer state resets on reload; acceptable for MVP |
 | Y-029 | place_order RPC — server re-validates prices but no stock/availability check | Flagged risk | S3 | Menu item could be marked unavailable after cart add; add availability recheck in RPC before launch |
+| Y-030 | Order history status_delivering key missing from STATUS_CHIP map | Known limitation | S4 | Status chip falls back to fog/ash; add 'delivering' entry or handle via OrderStatus union |
+| Y-031 | Order tracking "Contacter le restaurant" button disabled placeholder | Deferred feature | S4 | Contact flow (phone/chat) deferred to Phase 2 |
+| Y-032 | Bottom nav labels hardcoded (not using next-intl t()) | CLAUDE.md violation | S0 | Zero-hardcoded-strings rule; fix in next polish session |
+| Y-033 | Reorder uses delivery_fee snapshot from order, not current restaurant fee | Known limitation | S4 | Acceptable for MVP; fee may differ if restaurant updated it since last order |
 
 ---
 
@@ -81,7 +85,10 @@
 | — | App routing conflict (customer + merchant both resolving to /) | S1 | Moved pages to customer/ and merchant/ subfolders |
 | — | useState cart in RestaurantClient replaced with Zustand | S3 | lib/cart-store.ts wired; FloatingCartBar + CartDrawer use store |
 | — | place_order RPC called via route handler (not client) | S3 | app/api/orders/route.ts authenticates server-side; non-negotiable respected |
+| — | IconSprite default export imported as named export in layout.tsx | S4 | Fixed: `import { IconSprite }` → `import IconSprite` (pre-existing but caught in S4 tsc run) |
+| — | Order tracking page with Supabase Realtime | S4 | orders/[id]/page.tsx + OrderTracker.tsx; stepper + live badge + cleanup on unmount |
+| — | Order history with reorder CTA | S4 | orders/page.tsx; fetches with restaurant+items join; cart pre-fill + navigate to restaurant |
 
 ---
 
-*Last updated: 07 August 2026 — S3 complete (Cart + Checkout + Confirmation)*
+*Last updated: 08 August 2026 — S4 complete (Order Tracking + Realtime + Order History + Reorder)*
