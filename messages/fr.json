@@ -34,6 +34,7 @@
     "otp_placeholder": "6 chiffres",
     "otp_hint": "Entrez le code reçu par SMS",
     "otp_demo_hint": "Mode démo : entrez n'importe quels 6 chiffres",
+    "login_button": "Se connecter",
     "send_otp": "Envoyer le code",
     "verify_otp": "Vérifier",
     "resend_otp": "Renvoyer le code",

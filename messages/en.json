@@ -34,6 +34,7 @@
     "otp_placeholder": "6 digits",
     "otp_hint": "Enter the code sent by SMS",
     "otp_demo_hint": "Demo mode: enter any 6 digits",
+    "login_button": "Log in",
     "send_otp": "Send code",
     "verify_otp": "Verify",
     "resend_otp": "Resend code",
