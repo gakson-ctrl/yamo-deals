@@ -20,34 +20,32 @@
  *   </body>
  */
 
-import type { SVGProps } from 'react';
 import { ICON_TOKENS, type IconName } from '@/lib/icon-tokens';
 
-export interface SpriteIconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
+export interface SpriteIconProps {
   name: IconName;
   /** Accessible label. Omit for decorative icons (defaults to aria-hidden). */
   label?: string;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
+// Sprite injection removed — using direct /icons/*.svg static files.
+// <use href="#id"> required an inline sprite which broke on Vercel (readFileSync).
 export function SpriteIcon({
   name,
   label,
   className = 'w-6 h-6',
-  ...props
+  style,
 }: SpriteIconProps) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      role={label ? 'img' : undefined}
-      aria-label={label}
+    <img
+      src={`/icons/${name}.svg`}
+      alt={label ?? ''}
       aria-hidden={label ? undefined : true}
-      focusable="false"
-      {...props}
-    >
-      {label ? <title>{label}</title> : null}
-      <use href={`#${name}`} />
-    </svg>
+      className={className}
+      style={style}
+    />
   );
 }
 

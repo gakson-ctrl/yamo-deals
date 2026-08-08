@@ -262,6 +262,14 @@ export interface Database {
         };
         Returns: boolean;
       };
+      toggle_restaurant_status: {
+        Args: {
+          p_restaurant_id: string;
+          p_owner_id: string;
+          p_is_open: boolean;
+        };
+        Returns: boolean;
+      };
     };
   };
 }

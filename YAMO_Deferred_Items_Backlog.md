@@ -45,6 +45,10 @@
 
 ## 🟢 Low priority (Phase 2)
 
+| Y-030 | Merchant orders — customer name not shown (RLS blocks profiles join) | Known limitation | S5 | profiles RLS prevents merchants from reading customer display_name; show customer_id last-6 as fallback instead; fix at prod by adding a policy or name snapshot in orders |
+| Y-031 | New order sound alert not implemented | Deferred feature | S5 | Browser audio requires user gesture; consider using Web Notifications API or a visible pulse animation instead; deferred to Phase 2 |
+
+
 | # | Item | Type | Deferred in | Notes |
 |---|---|---|---|---|
 | Y-006 | Push notifications (web push / FCM) | Deferred feature | Pre-S0 | New order alerts for merchant; status alerts for customer |
@@ -63,10 +67,6 @@
 | Y-027 | Order confirmation ETA hardcoded ("20–30 min") | Technical debt | S3 | Should compute from restaurant avg_prep_time + delivery estimate |
 | Y-028 | CartDrawer localStorage persistence excludes isDrawerOpen | Known limitation | S3 | Intentional — drawer state resets on reload; acceptable for MVP |
 | Y-029 | place_order RPC — server re-validates prices but no stock/availability check | Flagged risk | S3 | Menu item could be marked unavailable after cart add; add availability recheck in RPC before launch |
-| Y-030 | Order history status_delivering key missing from STATUS_CHIP map | Known limitation | S4 | Status chip falls back to fog/ash; add 'delivering' entry or handle via OrderStatus union |
-| Y-031 | Order tracking "Contacter le restaurant" button disabled placeholder | Deferred feature | S4 | Contact flow (phone/chat) deferred to Phase 2 |
-| Y-032 | Bottom nav labels hardcoded (not using next-intl t()) | CLAUDE.md violation | S0 | Zero-hardcoded-strings rule; fix in next polish session |
-| Y-033 | Reorder uses delivery_fee snapshot from order, not current restaurant fee | Known limitation | S4 | Acceptable for MVP; fee may differ if restaurant updated it since last order |
 
 ---
 
@@ -84,11 +84,15 @@
 | — | ESLint failures from @typescript-eslint/no-explicit-any | S1 | Removed eslint-disable comments; fixed underlying types |
 | — | App routing conflict (customer + merchant both resolving to /) | S1 | Moved pages to customer/ and merchant/ subfolders |
 | — | useState cart in RestaurantClient replaced with Zustand | S3 | lib/cart-store.ts wired; FloatingCartBar + CartDrawer use store |
+| — | useState cart in RestaurantClient replaced with Zustand | S3 | lib/cart-store.ts wired; FloatingCartBar + CartDrawer use store |
 | — | place_order RPC called via route handler (not client) | S3 | app/api/orders/route.ts authenticates server-side; non-negotiable respected |
-| — | IconSprite default export imported as named export in layout.tsx | S4 | Fixed: `import { IconSprite }` → `import IconSprite` (pre-existing but caught in S4 tsc run) |
-| — | Order tracking page with Supabase Realtime | S4 | orders/[id]/page.tsx + OrderTracker.tsx; stepper + live badge + cleanup on unmount |
-| — | Order history with reorder CTA | S4 | orders/page.tsx; fetches with restaurant+items join; cart pre-fill + navigate to restaurant |
+| — | Order tracking with Realtime subscription | S4 | OrderTracker.tsx subscribes to orders table; active step pulsing; cleanup on unmount |
+| — | Order history with reorder CTA | S4 | Pre-fills Zustand cart; navigates to restaurant page |
+| — | Login flow broken (no SMS fallback) | Cowork | Collapsed to single-step demo flow: phone → signInWithPassword (derived email) |
+| — | IconSprite.tsx readFileSync breaking Vercel | S1-FIX | Changed to return null; force rebuild via empty commit |
+| — | Merchant dashboard + live orders (S5) | S5 | StatCard, MerchantOrderCard, PrepTimeModal, DashboardClient, LiveOrdersClient; Realtime subscription; all mutations via RPCs |
+| — | SpriteIcon switched to &lt;img src="/icons/name.svg"&gt; | S5 | `<use href="#id">` approach dropped; icons served as static SVG files from /public/icons/ |
 
 ---
 
-*Last updated: 08 August 2026 — S4 complete (Order Tracking + Realtime + Order History + Reorder)*
+*Last updated: 08 August 2026 — S5 complete (Merchant Dashboard + Live Orders + Icon fix)*

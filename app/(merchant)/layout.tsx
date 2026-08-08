@@ -1,13 +1,20 @@
-/**
- * Merchant layout — top header + bottom navigation.
- */
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+import {
+  IconLayoutDashboard,
+  IconClipboardList,
+  IconToolsKitchen2,
+  IconReportMoney,
+} from '@tabler/icons-react';
 
-export default function MerchantLayout({
+export default async function MerchantLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = await getTranslations('nav');
+  const tCommon = await getTranslations('common');
+
   return (
     <div className="min-h-dvh bg-yamo-cream flex flex-col">
       {/* Top header */}
@@ -15,7 +22,9 @@ export default function MerchantLayout({
         <span className="font-sora font-bold text-lg text-yamo-ebony">
           <span className="text-yamo-red">YaMo</span> Merchant
         </span>
-        {/* Restaurant online/offline toggle comes in S5 */}
+        <span className="text-[10px] font-inter font-bold text-yamo-red border border-yamo-red rounded-yamo-chip px-2 py-0.5 tracking-wider">
+          {tCommon('demo_badge')}
+        </span>
       </header>
 
       {/* Page content */}
@@ -32,21 +41,38 @@ export default function MerchantLayout({
           pb-safe
         "
       >
-        <MerchantNavItem href="/merchant" label="Tableau de bord" />
-        <MerchantNavItem href="/merchant/orders" label="Commandes" />
-        <MerchantNavItem href="/merchant/menu" label="Menu" />
-        <MerchantNavItem href="/merchant/earnings" label="Revenus" />
+        <MerchantNavItem href="/merchant" label={t('dashboard')}>
+          <IconLayoutDashboard size={22} stroke={1.75} />
+        </MerchantNavItem>
+        <MerchantNavItem href="/merchant/orders" label={t('orders')}>
+          <IconClipboardList size={22} stroke={1.75} />
+        </MerchantNavItem>
+        <MerchantNavItem href="/merchant/menu" label={t('menu')}>
+          <IconToolsKitchen2 size={22} stroke={1.75} />
+        </MerchantNavItem>
+        <MerchantNavItem href="/merchant/earnings" label={t('earnings')}>
+          <IconReportMoney size={22} stroke={1.75} />
+        </MerchantNavItem>
       </nav>
     </div>
   );
 }
 
-function MerchantNavItem({ href, label }: { href: string; label: string }) {
+function MerchantNavItem({
+  href,
+  label,
+  children,
+}: {
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
-      className="flex flex-col items-center text-yamo-ash hover:text-yamo-red transition-colors"
+      className="flex flex-col items-center gap-0.5 text-yamo-ash hover:text-yamo-red transition-colors"
     >
+      {children}
       <span className="text-[10px] font-inter font-medium">{label}</span>
     </Link>
   );
