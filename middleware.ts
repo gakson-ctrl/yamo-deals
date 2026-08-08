@@ -1,3 +1,9 @@
+
+export const config = {
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};
 import { type NextRequest, NextResponse } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { createServerClient } from '@supabase/ssr';
