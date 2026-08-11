@@ -82,7 +82,20 @@
     "add_to_cart": "Add",
     "remove_item": "Remove",
     "unavailable": "Unavailable",
-    "see_menu": "See menu"
+    "see_menu": "See menu",
+    "title": "My menu",
+    "add_item": "Add a dish",
+    "add_category": "Add a category",
+    "item_name": "Dish name",
+    "item_price": "Price (FCFA)",
+    "item_desc": "Description (optional)",
+    "item_category": "Category",
+    "available": "Available",
+    "photo_hint": "Tap to choose a photo",
+    "no_items": "No dishes in this category",
+    "no_categories": "No categories yet",
+    "category_name": "Category name",
+    "create_category": "Create"
   },
   "cart": {
     "title": "My cart",
@@ -105,6 +118,7 @@
     "note_placeholder": "Allergies, preferences… (optional)",
     "payment_method": "Payment method",
     "place_order": "Order now",
+    "confirm_order": "Confirm order",
     "order_summary": "Summary"
   },
   "payment": {

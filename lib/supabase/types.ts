@@ -270,6 +270,40 @@ export interface Database {
         };
         Returns: boolean;
       };
+      insert_menu_item: {
+        Args: {
+          p_restaurant_id: string;
+          p_owner_id: string;
+          p_category_id: string | null;
+          p_name: string;
+          p_description?: string | null;
+          p_price: number;
+          p_image_url?: string | null;
+          p_is_available?: boolean;
+        };
+        Returns: string;
+      };
+      update_menu_item: {
+        Args: {
+          p_item_id: string;
+          p_owner_id: string;
+          p_name: string;
+          p_description?: string | null;
+          p_price: number;
+          p_image_url?: string | null;
+          p_is_available?: boolean;
+          p_category_id?: string | null;
+        };
+        Returns: boolean;
+      };
+      delete_menu_item: {
+        Args: { p_item_id: string; p_owner_id: string };
+        Returns: boolean;
+      };
+      insert_menu_category: {
+        Args: { p_restaurant_id: string; p_owner_id: string; p_name: string };
+        Returns: string;
+      };
     };
   };
 }

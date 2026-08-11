@@ -82,7 +82,20 @@
     "add_to_cart": "Ajouter",
     "remove_item": "Retirer",
     "unavailable": "Indisponible",
-    "see_menu": "Voir le menu"
+    "see_menu": "Voir le menu",
+    "title": "Mon menu",
+    "add_item": "Ajouter un plat",
+    "add_category": "Ajouter une catégorie",
+    "item_name": "Nom du plat",
+    "item_price": "Prix (FCFA)",
+    "item_desc": "Description (optionnel)",
+    "item_category": "Catégorie",
+    "available": "Disponible",
+    "photo_hint": "Appuyez pour choisir une photo",
+    "no_items": "Aucun plat dans cette catégorie",
+    "no_categories": "Aucune catégorie pour l'instant",
+    "category_name": "Nom de la catégorie",
+    "create_category": "Créer"
   },
   "cart": {
     "title": "Mon panier",
@@ -105,6 +118,7 @@
     "note_placeholder": "Allergies, préférences… (optionnel)",
     "payment_method": "Mode de paiement",
     "place_order": "Commander maintenant",
+    "confirm_order": "Confirmer la commande",
     "order_summary": "Récapitulatif"
   },
   "payment": {

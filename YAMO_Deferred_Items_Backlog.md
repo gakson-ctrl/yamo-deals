@@ -45,11 +45,6 @@
 
 ## 🟢 Low priority (Phase 2)
 
-| Y-030 | Merchant orders — customer name not shown (RLS blocks profiles join) | Known limitation | S5 | profiles RLS prevents merchants from reading customer display_name; show customer_id last-6 as fallback instead; fix at prod by adding a policy or name snapshot in orders |
-| Y-032 | Web Audio beep requires prior user gesture (Chrome autoplay policy) | Known limitation | S6 | AudioContext starts suspended; ctx.resume() called before beep; first notification after a user click will beep; tab opened cold may not beep the first time |
-| Y-033 | Browser UI verification skipped (no dev server in session) | Process gap | S6 | TypeScript + ESLint clean but visual render unverified; run npm run dev + open /customer/orders/[id] and /merchant/orders to test Realtime |
-
-
 | # | Item | Type | Deferred in | Notes |
 |---|---|---|---|---|
 | Y-006 | Push notifications (web push / FCM) | Deferred feature | Pre-S0 | New order alerts for merchant; status alerts for customer |
@@ -67,7 +62,8 @@
 | Y-026 | Checkout delivery address — no map picker | Deferred feature | S3 | Free text input only; Google Maps / OSM picker deferred to Phase 2 |
 | Y-027 | Order confirmation ETA hardcoded ("20–30 min") | Technical debt | S3 | Should compute from restaurant avg_prep_time + delivery estimate |
 | Y-028 | CartDrawer localStorage persistence excludes isDrawerOpen | Known limitation | S3 | Intentional — drawer state resets on reload; acceptable for MVP |
-| Y-029 | place_order RPC — server re-validates prices but no stock/availability check | Flagged risk | S3 | Menu item could be marked unavailable after cart add; add availability recheck in RPC before launch |
+| Y-034 | Merchant dashboard "Une erreur est survenue" when no restaurant linked to owner_id | Bug | S5 live test | Merchant dashboard crashes if profiles.owner_id not set on any restaurant |
+| Y-035 | Checkout address field missing or hidden above fold on some screen sizes | Bug | S3 live test | Delivery address input not visible — needs investigation |
 
 ---
 
@@ -91,11 +87,41 @@
 | — | Order history with reorder CTA | S4 | Pre-fills Zustand cart; navigates to restaurant page |
 | — | Login flow broken (no SMS fallback) | Cowork | Collapsed to single-step demo flow: phone → signInWithPassword (derived email) |
 | — | IconSprite.tsx readFileSync breaking Vercel | S1-FIX | Changed to return null; force rebuild via empty commit |
-| — | Merchant dashboard + live orders (S5) | S5 | StatCard, MerchantOrderCard, PrepTimeModal, DashboardClient, LiveOrdersClient; Realtime subscription; all mutations via RPCs |
-| — | SpriteIcon switched to &lt;img src="/icons/name.svg"&gt; | S5 | `<use href="#id">` approach dropped; icons served as static SVG files from /public/icons/ |
-| Y-031 | New order sound alert | S6 | Web Audio API 2-beep tone on INSERT realtime event; ctx.resume() handles Chrome autoplay policy; document.hidden check prevents beep on background tabs |
-| — | S6 complete (Order Lifecycle + Realtime) | S6 | OrderTracker: toast notifications + countdown timer + cancel flow; MerchantOrderCard: 30s interval + elapsed time color coding; LiveOrdersClient: Web Audio beep + tab title badge; Merchant order detail page (/merchant/orders/[id]); i18n: tracking.*, toast.* namespaces added |
+| — | SpriteIcon switched to direct img src approach | S5 | No more readFileSync; icons served as static files from /public/icons/ |
+| — | Order tracking stepper static → Realtime | S6 | Supabase Realtime subscription on orders table; stepper auto-advances |
+| — | Toast notifications on order status change | S6 | 4s auto-dismiss toast (no external library) |
+| — | ETA countdown on customer tracking page | S6 | setInterval 60s; clears on unmount |
+| — | Cancel order button (pending only) | S6 | Inline confirm → PATCH route handler → cancel_order RPC |
+| — | Merchant elapsed time counter (color-coded) | S6 | 30s interval; green/amber/red by age |
+| — | Web Audio beep on new merchant order | S6 | 2-beep via Web Audio API; document.hidden guard |
+| — | Browser tab title badge (🔴 N nouvelles) | S6 | Updates on Realtime INSERT; resets on accept |
+| — | Merchant order detail page | S6 | /merchant/orders/[id] with full items, timestamps, action buttons |
+| — | next.config.js image domains | S6-FIX | Added unsplash + supabase.co to remotePatterns |
 
 ---
 
-*Last updated: 08 August 2026 — S6 complete (Order Lifecycle + Realtime Sync)*
+---
+
+## S7 — Menu Manager (Merchant) notes
+
+| # | Item | Type | Notes |
+|---|---|---|---|
+| Y-036 | Supabase Storage bucket `menu-items` must be created manually | Setup step | Dashboard → Storage → New bucket → name: `menu-items` → Public: true. Migration 0006 has SQL RPCs but cannot create the bucket. |
+| Y-037 | Uncategorized menu items not shown in Menu Manager | Known limitation | Items with `category_id = null` are stored in DB but not displayed. Workaround: always assign a category when adding. Phase 2: add "Sans catégorie" fallback section. |
+| Y-038 | Photo upload requires Storage bucket to be created (Y-036) | Dependency | If bucket missing, photo upload silently fails and item is saved without image. No UX error shown for missing bucket — acceptable for demo. |
+
+---
+
+## ✅ Resolved (continued)
+
+| # | Item | Resolved in | How |
+|---|---|---|---|
+| — | Menu Manager page — add/edit/toggle menu items | S7 | `app/(merchant)/merchant/menu/page.tsx` + `MenuManagerClient.tsx`; collapsible categories, item rows, optimistic availability toggle |
+| — | AddEditItemSheet — add/edit items with photo upload | S7 | `components/merchant/AddEditItemSheet.tsx`; uploads to Supabase Storage `menu-items` bucket |
+| — | AddCategorySheet — create menu categories | S7 | `components/merchant/AddCategorySheet.tsx`; calls `insert_menu_category` RPC via route handler |
+| — | Menu Manager API routes | S7 | `POST /api/menu-items`, `PATCH+DELETE /api/menu-items/[id]`, `POST /api/menu-categories` — all via SECURITY DEFINER RPCs |
+| — | `*.supabase.co` wildcard in remotePatterns | S7 | Fixed `next.config.js` from `supabase.co` to `*.supabase.co` so Storage image URLs load in `<Image>` |
+
+---
+
+*Last updated: 11 August 2026 — S7 complete (Menu Manager: add/edit items + categories, photo upload, availability toggle)*

@@ -1,5 +1,16 @@
 'use client';
 
+/**
+ * Checkout page — customer.
+ *
+ * Reads the cart from the Zustand store, collects delivery address + note,
+ * shows the payment selector (cash active, others "Bientôt disponible"),
+ * an order recap, and a fixed bottom CTA that POSTs to /api/orders.
+ *
+ * On success: clears the cart and navigates to the confirmation screen.
+ * Cash on delivery is the only active payment method in the MVP.
+ */
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -14,13 +25,14 @@ import {
 import { useCartStore } from '@/lib/cart-store';
 import { formatFCFA } from '@/lib/format';
 
+const DEFAULT_DELIVERY_FEE = 300; // FCFA — fallback when the store has none
+
 export default function CheckoutPage() {
   const router = useRouter();
   const tCommon = useTranslations('common');
   const tCheckout = useTranslations('checkout');
   const tPayment = useTranslations('payment');
   const tCart = useTranslations('cart');
-  const tOrder = useTranslations('order');
 
   const { items, restaurantId, deliveryFee, clearCart } = useCartStore();
 
@@ -39,13 +51,13 @@ export default function CheckoutPage() {
     }
   }, [mounted, items.length, router]);
 
+  const fee = deliveryFee || DEFAULT_DELIVERY_FEE;
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const total = subtotal + deliveryFee;
+  const total = subtotal + fee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!address.trim()) return;
-    if (!restaurantId) return;
+    if (!address.trim() || !restaurantId || isSubmitting) return;
 
     setIsSubmitting(true);
     setError(null);
@@ -57,8 +69,8 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           restaurant_id: restaurantId,
           items: items.map(i => ({ id: i.id, quantity: i.quantity })),
-          delivery_address: address,
-          note: note || undefined,
+          delivery_address: address.trim(),
+          note: note.trim() || undefined,
         }),
       });
 
@@ -78,17 +90,11 @@ export default function CheckoutPage() {
     }
   };
 
-  // Hydration loading state
-  if (!mounted) {
-    return <div className="min-h-dvh bg-yamo-cream" />;
-  }
-
-  // Guard: if empty after hydration, render nothing (redirect fires in useEffect)
-  if (items.length === 0) return null;
+  // Avoid flashing an empty form before hydration / redirect
+  if (!mounted || items.length === 0) return null;
 
   return (
-    <div className="min-h-dvh bg-yamo-cream pb-28">
-
+    <div className="min-h-screen bg-yamo-cream pb-28">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 bg-yamo-white border-b border-yamo-fog h-14 px-4 flex items-center gap-3">
         <Link
@@ -103,15 +109,19 @@ export default function CheckoutPage() {
         </h1>
       </header>
 
-      <form onSubmit={handleSubmit} className="px-4 pt-5 space-y-5">
+      <form id="checkout-form" onSubmit={handleSubmit} className="px-4 pt-5 space-y-5">
 
         {/* ── Delivery address ────────────────────────────────────────── */}
         <section>
-          <label className="flex items-center gap-2 font-sora font-bold text-sm text-yamo-ebony mb-2">
+          <label
+            htmlFor="address"
+            className="flex items-center gap-2 font-sora font-bold text-sm text-yamo-ebony mb-2"
+          >
             <IconMapPin size={16} className="text-yamo-red flex-none" />
             {tCheckout('delivery_address')}
           </label>
           <input
+            id="address"
             type="text"
             required
             value={address}
@@ -130,11 +140,15 @@ export default function CheckoutPage() {
 
         {/* ── Note to kitchen ──────────────────────────────────────────── */}
         <section>
-          <label className="flex items-center gap-2 font-sora font-bold text-sm text-yamo-ebony mb-2">
+          <label
+            htmlFor="note"
+            className="flex items-center gap-2 font-sora font-bold text-sm text-yamo-ebony mb-2"
+          >
             <IconNotes size={16} className="text-yamo-ash flex-none" />
             {tCheckout('note_label')}
           </label>
           <textarea
+            id="note"
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder={tCheckout('note_placeholder')}
@@ -212,7 +226,7 @@ export default function CheckoutPage() {
             </div>
             <div className="flex justify-between items-center px-4 py-2.5">
               <span className="font-inter text-sm text-yamo-ash">{tCart('delivery_fee')}</span>
-              <span className="font-inter text-sm text-yamo-ash">{formatFCFA(deliveryFee)}</span>
+              <span className="font-inter text-sm text-yamo-ash">{formatFCFA(fee)}</span>
             </div>
             <div className="flex justify-between items-center px-4 py-3">
               <span className="font-sora font-bold text-sm text-yamo-ebony">{tCart('total')}</span>
@@ -230,18 +244,17 @@ export default function CheckoutPage() {
       {/* ── Fixed bottom CTA ────────────────────────────────────────────── */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-30 bg-yamo-white border-t border-yamo-fog px-4 py-4">
         <button
-          type="button"
+          type="submit"
+          form="checkout-form"
           disabled={isSubmitting || !address.trim()}
-          onClick={handleSubmit}
           className="
-            w-full h-12 rounded-yamo-pill
+            w-full py-3 rounded-yamo-pill
             bg-yamo-red hover:bg-yamo-red-hover
-            text-yamo-white font-sora font-bold text-sm
-            disabled:opacity-50 disabled:cursor-not-allowed
-            transition-colors
+            text-yamo-white font-sora font-semibold text-sm
+            transition-colors disabled:opacity-60 disabled:cursor-not-allowed
           "
         >
-          {isSubmitting ? tCommon('loading') : tCheckout('place_order')}
+          {isSubmitting ? '…' : tCheckout('confirm_order')}
         </button>
       </div>
     </div>
