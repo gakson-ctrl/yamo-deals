@@ -22,6 +22,30 @@ interface LiveOrdersClientProps {
   initialOrders: MerchantOrder[];
 }
 
+function playNewOrderBeep() {
+  if (typeof window === 'undefined' || document.hidden) return;
+  try {
+    const ctx = new AudioContext();
+    const note = (freq: number, start: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.25, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.15);
+      osc.start(start);
+      osc.stop(start + 0.15);
+    };
+    void ctx.resume().then(() => {
+      note(880, ctx.currentTime);
+      note(1108, ctx.currentTime + 0.22);
+    });
+  } catch {
+    // AudioContext may be unavailable — ignore
+  }
+}
+
 export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClientProps) {
   const t = useTranslations('merchant');
   const [orders, setOrders] = useState<MerchantOrder[]>(initialOrders);
@@ -30,24 +54,34 @@ export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClie
 
   const supabase = useMemo(() => createClient(), []);
 
+  // Tab title badge — reflects pending order count
+  useEffect(() => {
+    const count = orders.filter(o => o.status === 'pending').length;
+    document.title = count > 0
+      ? `🔴 ${count} nouvelles — YaMo Merchant`
+      : 'YaMo Deals';
+    return () => { document.title = 'YaMo Deals'; };
+  }, [orders]);
+
   // Realtime subscription: re-fetch the full order row on any change
   useEffect(() => {
     const channel = supabase
       .channel(`merchant:orders:${restaurantId}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders',
-          filter: `restaurant_id=eq.${restaurantId}`,
-        },
+        { event: '*', schema: 'public', table: 'orders', filter: `restaurant_id=eq.${restaurantId}` },
         async (payload) => {
           if (payload.eventType === 'DELETE') return;
+
           const orderId = (payload.new as { id: string }).id;
           const newStatus = (payload.new as { status: string }).status;
 
-          // Remove terminal orders from live list
+          // New order → beep
+          if (payload.eventType === 'INSERT') {
+            playNewOrderBeep();
+          }
+
+          // Terminal statuses: remove from live list
           if (newStatus === 'delivered' || newStatus === 'cancelled') {
             setOrders(prev => prev.filter(o => o.id !== orderId));
             return;
@@ -73,6 +107,7 @@ export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClie
               next[idx] = data;
               return next;
             }
+            // New order not yet in list
             return [data, ...prev];
           });
         },
@@ -82,7 +117,6 @@ export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClie
     return () => { supabase.removeChannel(channel); };
   }, [restaurantId, supabase]);
 
-  // API call helpers
   const callApi = async (orderId: string, body: Record<string, unknown>) => {
     const res = await fetch(`/api/orders/${orderId}`, {
       method: 'PATCH',
@@ -131,7 +165,8 @@ export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClie
           </span>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-3 border-b border-yamo-fog"
+        <div
+          className="flex gap-2 overflow-x-auto pb-3 border-b border-yamo-fog"
           style={{ scrollbarWidth: 'none' }}
         >
           {TABS.map(tab => (

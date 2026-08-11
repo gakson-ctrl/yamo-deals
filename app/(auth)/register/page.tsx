@@ -107,7 +107,7 @@ export default function RegisterPage() {
     // Demo fallback: signUp with derived email + phone-based password.
     if (!verifyData?.user) {
       const demoEmail = `demo_${phone.replace(/\D/g, '')}@yamo.demo`;
-      const demoPassword = 'yamo_demo_2026';
+      const demoPassword = 'YamoDemo2026!';
 
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: demoEmail,

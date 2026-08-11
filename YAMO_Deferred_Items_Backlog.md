@@ -46,7 +46,8 @@
 ## 🟢 Low priority (Phase 2)
 
 | Y-030 | Merchant orders — customer name not shown (RLS blocks profiles join) | Known limitation | S5 | profiles RLS prevents merchants from reading customer display_name; show customer_id last-6 as fallback instead; fix at prod by adding a policy or name snapshot in orders |
-| Y-031 | New order sound alert not implemented | Deferred feature | S5 | Browser audio requires user gesture; consider using Web Notifications API or a visible pulse animation instead; deferred to Phase 2 |
+| Y-032 | Web Audio beep requires prior user gesture (Chrome autoplay policy) | Known limitation | S6 | AudioContext starts suspended; ctx.resume() called before beep; first notification after a user click will beep; tab opened cold may not beep the first time |
+| Y-033 | Browser UI verification skipped (no dev server in session) | Process gap | S6 | TypeScript + ESLint clean but visual render unverified; run npm run dev + open /customer/orders/[id] and /merchant/orders to test Realtime |
 
 
 | # | Item | Type | Deferred in | Notes |
@@ -92,7 +93,9 @@
 | — | IconSprite.tsx readFileSync breaking Vercel | S1-FIX | Changed to return null; force rebuild via empty commit |
 | — | Merchant dashboard + live orders (S5) | S5 | StatCard, MerchantOrderCard, PrepTimeModal, DashboardClient, LiveOrdersClient; Realtime subscription; all mutations via RPCs |
 | — | SpriteIcon switched to &lt;img src="/icons/name.svg"&gt; | S5 | `<use href="#id">` approach dropped; icons served as static SVG files from /public/icons/ |
+| Y-031 | New order sound alert | S6 | Web Audio API 2-beep tone on INSERT realtime event; ctx.resume() handles Chrome autoplay policy; document.hidden check prevents beep on background tabs |
+| — | S6 complete (Order Lifecycle + Realtime) | S6 | OrderTracker: toast notifications + countdown timer + cancel flow; MerchantOrderCard: 30s interval + elapsed time color coding; LiveOrdersClient: Web Audio beep + tab title badge; Merchant order detail page (/merchant/orders/[id]); i18n: tracking.*, toast.* namespaces added |
 
 ---
 
-*Last updated: 08 August 2026 — S5 complete (Merchant Dashboard + Live Orders + Icon fix)*
+*Last updated: 08 August 2026 — S6 complete (Order Lifecycle + Realtime Sync)*

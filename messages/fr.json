@@ -133,6 +133,7 @@
     "no_orders": "Aucune commande pour le moment",
     "reorder": "Commander à nouveau",
     "cancel_order": "Annuler la commande",
+    "cancel_confirm": "Annuler cette commande ?",
     "back_home": "Retour à l'accueil",
     "tracking_title": "Suivi de commande",
     "step_confirmed": "Confirmée",
@@ -211,6 +212,16 @@
     "by_day": "Par jour",
     "by_week": "Par semaine",
     "by_month": "Par mois"
+  },
+  "tracking": {
+    "estimated": "Livraison estimée dans",
+    "countdown_unit": "min",
+    "waiting": "En attente d'acceptation…"
+  },
+  "toast": {
+    "accepted": "Votre commande a été acceptée !",
+    "ready": "Votre commande est prête !",
+    "delivered": "Commande livrée. Bon appétit !"
   },
   "home": {
     "hero_subtitle": "Commandez vos plats préférés à Yaoundé",

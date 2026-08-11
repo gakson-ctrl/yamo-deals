@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { formatFCFA } from '@/lib/format';
 import { PrepTimeModal } from './PrepTimeModal';
@@ -35,6 +35,12 @@ const STATUS_CHIP: Record<OrderStatus, string> = {
   cancelled: 'bg-yamo-fog text-yamo-ash',
 };
 
+function getTimeColor(minutesAgo: number): string {
+  if (minutesAgo < 5)  return 'text-yamo-fern';
+  if (minutesAgo < 15) return 'text-amber-600';
+  return 'text-yamo-error';
+}
+
 export function MerchantOrderCard({
   order,
   onAccept,
@@ -47,8 +53,23 @@ export function MerchantOrderCard({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
 
-  const minutesAgo = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000);
-  const timeAgoStr = minutesAgo < 1 ? '< 1 min' : `${minutesAgo} min ${t('time_ago')}`;
+  // Force re-render every 30 s so elapsed time stays current
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick(n => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const minutesAgo = Math.floor(
+    (Date.now() - new Date(order.created_at).getTime()) / 60_000,
+  );
+  const timeAgoStr =
+    minutesAgo < 1
+      ? `< 1 min ${t('time_ago')}`
+      : `${minutesAgo} min ${t('time_ago')}`;
+  const timeColor = getTimeColor(minutesAgo);
+
+  const grandTotal = Number(order.total_amount) + Number(order.delivery_fee);
 
   const wrap = async (fn: () => Promise<void>) => {
     setLoading(true);
@@ -62,8 +83,6 @@ export function MerchantOrderCard({
     }
   };
 
-  const grandTotal = Number(order.total_amount) + Number(order.delivery_fee);
-
   return (
     <>
       <div className="bg-yamo-white rounded-yamo-card shadow-sm p-4 mb-3">
@@ -73,24 +92,36 @@ export function MerchantOrderCard({
             <span className="font-sora font-bold text-yamo-ebony text-base">
               {t('order_number')} #{order.id.slice(-6).toUpperCase()}
             </span>
-            <p className="text-yamo-ash font-inter text-xs mt-0.5">{timeAgoStr}</p>
+            <p className={`font-inter text-xs mt-0.5 font-medium ${timeColor}`}>
+              {timeAgoStr}
+            </p>
           </div>
-          <span className={`rounded-yamo-chip px-2 py-1 text-xs font-inter font-semibold shrink-0 ml-2 ${STATUS_CHIP[order.status]}`}>
+          <span className={`
+            rounded-yamo-chip px-2 py-1 text-xs font-inter font-semibold shrink-0 ml-2
+            ${STATUS_CHIP[order.status]}
+          `}>
             {order.status}
           </span>
         </div>
 
-        {/* Customer name */}
-        {order.profiles && (
+        {/* Customer */}
+        {order.profiles ? (
           <p className="text-yamo-ash font-inter text-xs mb-3">
             {t('customer')}&nbsp;:{' '}
             <span className="text-yamo-ebony font-medium">{order.profiles.display_name}</span>
+          </p>
+        ) : (
+          <p className="text-yamo-ash font-inter text-xs mb-3">
+            {t('customer')}&nbsp;:&nbsp;
+            <span className="text-yamo-ebony font-medium">
+              #{order.customer_id.slice(-6).toUpperCase()}
+            </span>
           </p>
         )}
 
         {/* Items */}
         <div className="border-t border-yamo-fog pt-2 mb-2 space-y-1">
-          {order.order_items.map((item) => (
+          {order.order_items.map(item => (
             <div key={item.id} className="flex justify-between items-center">
               <span className="font-inter text-sm text-yamo-ebony">
                 ×{item.quantity} {item.name}
@@ -118,7 +149,7 @@ export function MerchantOrderCard({
         {/* Error */}
         {err && <p className="text-xs text-yamo-error mb-2 font-inter">{err}</p>}
 
-        {/* Actions per status */}
+        {/* Actions */}
         {order.status === 'pending' && (
           <div className="flex gap-2">
             <button
@@ -187,7 +218,7 @@ export function MerchantOrderCard({
       <PrepTimeModal
         isOpen={showPrepModal}
         onClose={() => setShowPrepModal(false)}
-        onConfirm={(prepTime) => { wrap(() => onAccept(order.id, prepTime)); }}
+        onConfirm={prepTime => { wrap(() => onAccept(order.id, prepTime)); }}
       />
     </>
   );

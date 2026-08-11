@@ -1,9 +1,13 @@
-const createNextIntlPlugin = require('next-intl/plugin');
-
-// Points at our App Router request config (i18n.ts at project root).
-const withNextIntl = createNextIntlPlugin('./i18n.ts');
+const withNextIntl = require('next-intl/plugin')('./i18n.ts');
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      { hostname: 'images.unsplash.com' },
+      { hostname: 'supabase.co' },
+    ],
+  },
+};
 
 module.exports = withNextIntl(nextConfig);

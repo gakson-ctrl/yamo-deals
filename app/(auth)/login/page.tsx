@@ -52,7 +52,7 @@ export default function LoginPage() {
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: demoEmail,
-      password: 'yamo_demo_2026',
+      password: 'YamoDemo2026!',
     });
 
     if (signInError) {

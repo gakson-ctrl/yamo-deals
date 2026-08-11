@@ -133,6 +133,7 @@
     "no_orders": "No orders yet",
     "reorder": "Order again",
     "cancel_order": "Cancel order",
+    "cancel_confirm": "Cancel this order?",
     "back_home": "Back to home",
     "tracking_title": "Track order",
     "step_confirmed": "Confirmed",
@@ -211,6 +212,16 @@
     "by_day": "By day",
     "by_week": "By week",
     "by_month": "By month"
+  },
+  "tracking": {
+    "estimated": "Estimated delivery in",
+    "countdown_unit": "min",
+    "waiting": "Waiting for acceptance…"
+  },
+  "toast": {
+    "accepted": "Your order has been accepted!",
+    "ready": "Your order is ready!",
+    "delivered": "Order delivered. Enjoy your meal!"
   },
   "home": {
     "hero_subtitle": "Order your favourite dishes in Yaoundé",
