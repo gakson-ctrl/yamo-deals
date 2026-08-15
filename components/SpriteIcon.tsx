@@ -30,8 +30,9 @@ export interface SpriteIconProps {
   style?: React.CSSProperties;
 }
 
-// Sprite injection removed — using direct /icons/*.svg static files.
-// <use href="#id"> required an inline sprite which broke on Vercel (readFileSync).
+// Icons rendered via CSS mask-image so that `text-*` color classes apply correctly.
+// SVG loaded via <img> cannot inherit CSS color; mask-image reads alpha channel
+// of the SVG (stroke = opaque) and paints it with backgroundColor: currentColor.
 export function SpriteIcon({
   name,
   label,
@@ -39,12 +40,21 @@ export function SpriteIcon({
   style,
 }: SpriteIconProps) {
   return (
-    <img
-      src={`/icons/${name}.svg`}
-      alt={label ?? ''}
+    <span
+      role={label ? 'img' : undefined}
+      aria-label={label}
       aria-hidden={label ? undefined : true}
-      className={className}
-      style={style}
+      className={`inline-block ${className}`}
+      style={{
+        ...style,
+        backgroundColor: 'currentColor',
+        WebkitMaskImage: `url(/icons/${name}.svg)`,
+        maskImage: `url(/icons/${name}.svg)`,
+        WebkitMaskSize: '100% 100%',
+        maskSize: '100% 100%',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+      }}
     />
   );
 }

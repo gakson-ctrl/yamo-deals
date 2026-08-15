@@ -18,6 +18,7 @@ const TAB_STATUSES: Record<Tab, OrderStatus[]> = {
 };
 
 interface LiveOrdersClientProps {
+  /** Restaurant UUID from SSR — may be empty string if SSR could not resolve it. */
   restaurantId: string;
   initialOrders: MerchantOrder[];
 }
@@ -46,13 +47,58 @@ function playNewOrderBeep() {
   }
 }
 
-export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClientProps) {
+export function LiveOrdersClient({ restaurantId: initialRestaurantId, initialOrders }: LiveOrdersClientProps) {
   const t = useTranslations('merchant');
   const [orders, setOrders] = useState<MerchantOrder[]>(initialOrders);
   const [activeTab, setActiveTab] = useState<Tab>('new');
   const [connected, setConnected] = useState(false);
+  // restaurantId may arrive empty if SSR failed; client resolves it
+  const [restaurantId, setRestaurantId] = useState(initialRestaurantId);
 
   const supabase = useMemo(() => createClient(), []);
+
+  // Client-side fetch — runs on mount regardless of SSR result.
+  // Guarantees orders display even when SSR auth/RLS fails.
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchOrders = async () => {
+      let rid = restaurantId;
+
+      // If SSR could not resolve the restaurant, look it up client-side
+      if (!rid) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || !mounted) return;
+        const { data: rest } = await (supabase.from('restaurants') as ReturnType<typeof supabase.from>)
+          .select('id')
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle() as { data: { id: string } | null; error: unknown };
+        if (!rest || !mounted) return;
+        rid = rest.id;
+        setRestaurantId(rid);
+      }
+
+      const { data } = await (supabase.from('orders') as ReturnType<typeof supabase.from>)
+        .select(`
+          id, status, total_amount, delivery_fee, created_at,
+          prep_time_min, note_to_kitchen, customer_id,
+          order_items(id, name, unit_price, quantity)
+        `)
+        .eq('restaurant_id', rid)
+        .in('status', ['pending', 'accepted', 'preparing', 'ready'])
+        .order('created_at', { ascending: false }) as { data: MerchantOrder[] | null; error: unknown };
+
+      if (!mounted) return;
+      if (data) setOrders(data);
+    };
+
+    void fetchOrders();
+    return () => { mounted = false; };
+  // Run once on mount; supabase client is stable (memo [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase]);
 
   // Tab title badge — reflects pending order count
   useEffect(() => {
@@ -63,8 +109,10 @@ export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClie
     return () => { document.title = 'YaMo Deals'; };
   }, [orders]);
 
-  // Realtime subscription: re-fetch the full order row on any change
+  // Realtime subscription: re-fetch the full order row on any change.
+  // Re-runs when restaurantId resolves (client fallback may set it after SSR miss).
   useEffect(() => {
+    if (!restaurantId) return;
     const channel = supabase
       .channel(`merchant:orders:${restaurantId}`)
       .on(

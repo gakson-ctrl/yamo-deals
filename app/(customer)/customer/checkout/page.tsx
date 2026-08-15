@@ -27,6 +27,13 @@ import { formatFCFA } from '@/lib/format';
 
 const DEFAULT_DELIVERY_FEE = 300; // FCFA — fallback when the store has none
 
+const YAOUNDÉ_QUARTIERS = [
+  'Bastos', 'Bonanjo', 'Biyem-Assi', 'Nlongkak', 'Mvog-Ada',
+  'Melen', 'Omnisports', 'Mendong', 'Nsam', 'Essos',
+  'Nkoldongo', 'Mvog-Mbi', 'Efoulan', 'Mfandena',
+  'Tsinga', 'Angono', 'Nkomo', 'Emana', 'Simbock', 'Odza',
+];
+
 export default function CheckoutPage() {
   const router = useRouter();
   const tCommon = useTranslations('common');
@@ -38,9 +45,15 @@ export default function CheckoutPage() {
 
   const [mounted, setMounted] = useState(false);
   const [address, setAddress] = useState('');
+  const [precision, setPrecision] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const filteredQuartiers = address
+    ? YAOUNDÉ_QUARTIERS.filter(q => q.toLowerCase().includes(address.toLowerCase()))
+    : YAOUNDÉ_QUARTIERS;
 
   // True once an order is placed — prevents the empty-cart redirect below
   // from racing (and beating) the navigation to the confirmation page.
@@ -68,13 +81,16 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
+      const parts = [address.trim(), precision.trim()].filter(Boolean);
+      const fullAddress = parts.join(' — ');
+
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           restaurant_id: restaurantId,
           items: items.map(i => ({ id: i.id, quantity: i.quantity })),
-          delivery_address: address.trim(),
+          delivery_address: fullAddress,
           note: note.trim() || undefined,
         }),
       });
@@ -128,22 +144,90 @@ export default function CheckoutPage() {
             <IconMapPin size={16} className="text-yamo-red flex-none" />
             {tCheckout('delivery_address')}
           </label>
-          <input
-            id="address"
-            type="text"
-            required
-            value={address}
-            onChange={e => setAddress(e.target.value)}
-            placeholder={tCheckout('address_placeholder')}
-            className="
-              w-full h-11 px-3 rounded-yamo-input
-              border border-yamo-fog
-              font-inter text-sm text-yamo-ebony placeholder:text-yamo-ash
-              bg-yamo-white
-              focus:outline-none focus:border-yamo-red focus:ring-1 focus:ring-yamo-red/30
-              transition
-            "
-          />
+
+          {/* Quartier autocomplete */}
+          <div className="relative">
+            <input
+              id="address"
+              type="text"
+              required
+              autoComplete="off"
+              value={address}
+              onChange={e => {
+                setAddress(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => setShowDropdown(true)}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+              placeholder={tCheckout('quartier_placeholder')}
+              className="
+                w-full h-11 px-3 rounded-yamo-input
+                border border-yamo-fog
+                font-inter text-sm text-yamo-ebony placeholder:text-yamo-ash
+                bg-yamo-white
+                focus:outline-none focus:border-yamo-red focus:ring-1 focus:ring-yamo-red/30
+                transition
+              "
+            />
+
+            {/* Dropdown */}
+            {showDropdown && filteredQuartiers.length > 0 && (
+              <ul
+                role="listbox"
+                className="
+                  absolute z-40 top-full left-0 right-0 mt-1
+                  bg-yamo-white rounded-yamo-card border border-yamo-fog shadow-md
+                  max-h-[200px] overflow-y-auto
+                "
+              >
+                {filteredQuartiers.map(q => (
+                  <li
+                    key={q}
+                    role="option"
+                    aria-selected={address === q}
+                    onMouseDown={() => {
+                      setAddress(q);
+                      setShowDropdown(false);
+                    }}
+                    className="
+                      flex items-center h-10 px-3
+                      font-inter text-sm text-yamo-ebony
+                      cursor-pointer
+                      hover:bg-yamo-red-light hover:text-yamo-red
+                      transition-colors
+                    "
+                  >
+                    {q}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Precision / landmark */}
+          <div className="mt-2">
+            <label
+              htmlFor="precision"
+              className="font-inter text-xs text-yamo-ash mb-1 block"
+            >
+              {tCheckout('address_precision_label')}
+            </label>
+            <input
+              id="precision"
+              type="text"
+              value={precision}
+              onChange={e => setPrecision(e.target.value)}
+              placeholder={tCheckout('address_precision_placeholder')}
+              className="
+                w-full h-10 px-3 rounded-yamo-input
+                border border-yamo-fog
+                font-inter text-sm text-yamo-ebony placeholder:text-yamo-ash
+                bg-yamo-white
+                focus:outline-none focus:border-yamo-red focus:ring-1 focus:ring-yamo-red/30
+                transition
+              "
+            />
+          </div>
         </section>
 
         {/* ── Note to kitchen ──────────────────────────────────────────── */}
