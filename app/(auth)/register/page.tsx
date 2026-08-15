@@ -266,7 +266,7 @@ export default function RegisterPage() {
                     text-center transition-all duration-150
                   ">
                     <span className="block text-lg mb-0.5">
-                      {role === 'customer' ? '🛵' : '🍽️'}
+                      {role === 'customer' ? '👤' : '🍽️'}
                     </span>
                     <span className="font-inter text-xs font-semibold text-yamo-ebony">
                       {role === 'customer' ? t('role_customer_short') : t('role_merchant_short')}

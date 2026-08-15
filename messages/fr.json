@@ -35,7 +35,7 @@
     "otp_hint": "Entrez le code reçu par SMS",
     "otp_demo_hint": "Mode démo : entrez n'importe quels 6 chiffres",
     "login_button": "Se connecter",
-    "send_otp": "Envoyer le code",
+    "send_otp": "Créer mon compte",
     "verify_otp": "Vérifier",
     "resend_otp": "Renvoyer le code",
     "name_label": "Prénom et nom",
