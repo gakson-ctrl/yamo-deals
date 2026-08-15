@@ -172,4 +172,48 @@
 | — | Order history: date+time display | S9 | `formatDateTime` added to `lib/format.ts`; orders page shows "11 août 2026 à 14:32" |
 | — | Order history: "Laisser un avis" CTA | S9 | Appears on delivered orders alongside reorder button; links to `/customer/review/[order_id]` (S11 placeholder) |
 
-*Last updated: 15 August 2026 — S9 complete (Profile, Address book, Order history improvements, Merchant orders fix)*
+---
+
+## S10 — Reviews Flow notes
+
+| # | Item | Type | Notes |
+|---|---|---|---|
+| Y-045 | Review page migration 0008 must be applied manually | Setup step | Run `supabase/migrations/0008_reviews.sql` via Dashboard SQL Editor or `supabase db push`. Until applied, review submissions will fail. |
+| Y-046 | Reviewer name shown as anonymous "Client #XXXX" | Known limitation | RLS blocks merchant/customer from reading other profiles' display_name. MVP shows last 4 chars of customer_id. Phase 2: use a public display alias on reviews table. |
+
+---
+
+## S11 — Earnings Summary notes
+
+| # | Item | Type | Notes |
+|---|---|---|---|
+| Y-047 | CSV export uses browser Blob API | Known limitation | Works in real browser. Not compatible with Artifact sandbox (but this is the live app, not an Artifact). |
+| Y-048 | Bar chart always shows last 7 days regardless of period tab | Design decision | Period tabs filter the hero stats + recent orders list. The chart always shows 7-day trend for context. Phase 2: make chart responsive to period. |
+
+---
+
+## ✅ Resolved (continued)
+
+| # | Item | Resolved in | How |
+|---|---|---|---|
+| Y-043 | Review page `/customer/review/[order_id]` not implemented | S10 | `app/(customer)/customer/review/[id]/page.tsx` + `ReviewClient.tsx`; star selector, comment, submit → `POST /api/reviews` → `insert_review` RPC; success state with fern checkmark; redirects if order not delivered or not owned |
+| — | insert_review RPC | S10 | `0008_reviews.sql`; validates ownership + delivered status + unique constraint; updates restaurant rolling avg |
+| — | POST /api/reviews route handler | S10 | `app/api/reviews/route.ts`; auth-guarded, calls insert_review RPC |
+| — | Restaurant Avis tab — real reviews | S10 | Lazy fetch on tab click (browser Supabase client); aggregate rating + StarRow; review cards with anonymous avatar; empty state |
+| Y-025 | Avis tab placeholder replaced | S10 | Now shows real reviews fetched from `reviews` table; Infos tab keeps "Bientôt disponible" |
+| — | Merchant earnings page | S11 | `app/(merchant)/merchant/earnings/page.tsx` + `EarningsClient.tsx`; period tabs (Today / 7 days / 30 days); hero revenue card; stat cards; pure CSS 7-day bar chart; recent orders list; CSV export |
+| — | Earnings nav tab wired | S11 | Already linked in merchant layout since S5; `app/(merchant)/merchant/earnings/` now exists |
+
+---
+
+## 🏁 MVP COMPLETE — S0 through S11
+
+All 12 build sessions are done. App is ready for demo at ONE CEILING Innovation Hub.
+
+**Remaining before production:**
+- Apply migrations 0007 + 0008 via Supabase Dashboard
+- Create `menu-items` Storage bucket (Y-036)
+- Wire real OTP via Africa's Talking or HelloDuty (Y-001)
+- Choose Supabase region for production project (Y-002)
+
+*Last updated: 15 August 2026 — S10+S11 complete (Reviews flow + Earnings summary). MVP complete.*

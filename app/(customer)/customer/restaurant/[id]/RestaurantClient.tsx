@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { IconArrowLeft, IconShoppingCart, IconClock } from '@tabler/icons-react';
 import { RatingBadge } from '@/components/shared/RatingBadge';
 import { MenuItemCard } from '@/components/customer/MenuItemCard';
 import { FloatingCartBar } from '@/components/customer/FloatingCartBar';
 import { useCartStore } from '@/lib/cart-store';
-import { formatFCFA } from '@/lib/format';
+import { createClient } from '@/lib/supabase/client';
+import { formatFCFA, formatDate } from '@/lib/format';
 import type { Database } from '@/lib/supabase/types';
 
 type Restaurant = Database['public']['Tables']['restaurants']['Row'];
@@ -22,14 +23,41 @@ interface Props {
   items: MenuItem[];
 }
 
+type ReviewData = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  customer_id: string;
+};
+
+function StarRow({ rating }: { rating: number }) {
+  return (
+    <span aria-label={`${rating} étoiles sur 5`}>
+      {[1, 2, 3, 4, 5].map(n => (
+        <span key={n} className={n <= rating ? 'text-yamo-mango' : 'text-yamo-fog'}>
+          ★
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function RestaurantClient({ restaurant, categories, items }: Props) {
   const router = useRouter();
   const tCommon = useTranslations('common');
   const tRes = useTranslations('restaurant');
   const tCart = useTranslations('cart');
+  const tReview = useTranslations('review');
+  const rawLocale = useLocale();
+  const locale: 'fr' | 'en' = rawLocale === 'en' ? 'en' : 'fr';
 
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState<'menu' | 'avis' | 'infos'>('menu');
+  const [reviews, setReviews] = useState<ReviewData[]>([]);
+  const [reviewsLoaded, setReviewsLoaded] = useState(false);
+
+  const supabase = useMemo(() => createClient(), []);
 
   const { addItem, removeItem, items: cartItems, openDrawer } = useCartStore();
 
@@ -38,6 +66,20 @@ export function RestaurantClient({ restaurant, categories, items }: Props) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'avis' || reviewsLoaded) return;
+    async function load() {
+      const { data } = await (supabase.from('reviews') as ReturnType<typeof supabase.from>)
+        .select('id, rating, comment, created_at, customer_id')
+        .eq('restaurant_id', restaurant.id)
+        .order('created_at', { ascending: false })
+        .limit(20) as { data: ReviewData[] | null; error: unknown };
+      setReviews(data ?? []);
+      setReviewsLoaded(true);
+    }
+    void load();
+  }, [activeTab, reviewsLoaded, restaurant.id, supabase]);
 
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
   const cartTotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -221,7 +263,76 @@ export function RestaurantClient({ restaurant, categories, items }: Props) {
           </div>
         )}
 
-        {(activeTab === 'avis' || activeTab === 'infos') && (
+        {activeTab === 'avis' && (
+          <div className="pt-4">
+            {/* Aggregate rating */}
+            {(restaurant.rating_count ?? 0) > 0 && (
+              <div className="flex items-center gap-3 mb-5">
+                <span className="font-sora font-bold text-5xl text-yamo-ebony leading-none">
+                  {(restaurant.rating ?? 0).toFixed(1)}
+                </span>
+                <div>
+                  <StarRow rating={Math.round(restaurant.rating ?? 0)} />
+                  <p className="font-inter text-xs text-yamo-ash mt-0.5">
+                    {restaurant.rating_count} avis
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {!reviewsLoaded && (
+              <div className="space-y-3">
+                {[1, 2].map(n => (
+                  <div key={n} className="h-20 bg-yamo-white rounded-yamo-card animate-pulse" />
+                ))}
+              </div>
+            )}
+
+            {reviewsLoaded && reviews.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <span className="text-4xl" aria-hidden>⭐</span>
+                <p className="font-sora font-semibold text-yamo-ash text-sm text-center">
+                  {tReview('no_reviews')}
+                </p>
+              </div>
+            )}
+
+            {reviewsLoaded && reviews.length > 0 && (
+              <ul className="space-y-3">
+                {reviews.map(r => (
+                  <li key={r.id} className="bg-yamo-white rounded-yamo-card p-4">
+                    <div className="flex items-start gap-3 mb-2">
+                      {/* Anonymous avatar */}
+                      <div className="w-9 h-9 rounded-full bg-yamo-red flex items-center justify-center flex-shrink-0">
+                        <span className="font-sora font-bold text-sm text-yamo-white">C</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-inter text-xs font-medium text-yamo-ebony">
+                            Client #{r.customer_id.slice(-4).toUpperCase()}
+                          </span>
+                          <span className="font-inter text-[10px] text-yamo-ash flex-shrink-0">
+                            {formatDate(r.created_at, locale)}
+                          </span>
+                        </div>
+                        <div className="text-sm mt-0.5">
+                          <StarRow rating={r.rating} />
+                        </div>
+                      </div>
+                    </div>
+                    {r.comment && (
+                      <p className="font-inter text-sm text-yamo-ash leading-relaxed pl-12">
+                        {r.comment}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'infos' && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <span className="text-4xl" aria-hidden>🔮</span>
             <p className="font-sora font-semibold text-yamo-ash text-sm">

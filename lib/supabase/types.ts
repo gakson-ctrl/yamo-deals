@@ -315,6 +315,16 @@ export interface Database {
         Args: { p_restaurant_id: string; p_owner_id: string; p_name: string };
         Returns: string;
       };
+      insert_review: {
+        Args: {
+          p_order_id: string;
+          p_customer_id: string;
+          p_restaurant_id: string;
+          p_rating: number;
+          p_comment?: string | null;
+        };
+        Returns: string;
+      };
     };
   };
 }
