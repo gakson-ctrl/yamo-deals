@@ -7,7 +7,7 @@
  * Production path: swap handleLogin for real OTP (signInWithOtp + verifyOtp).
  *
  * Demo email format: demo_{digits}@yamo.demo  (matches register page)
- * Demo password:     yamo_demo_2026
+ * Demo password:     YamoDemo2026!
  */
 
 import { useState } from 'react';

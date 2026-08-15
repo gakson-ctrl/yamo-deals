@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'Corps invalide' }, { status: 400 });
   }
 
-  const rpc = supabase.rpc as unknown as GenericRpc;
+  const rpc = supabase.rpc.bind(supabase) as unknown as GenericRpc;
   const { error } = await rpc('update_menu_item', {
     p_item_id:      params.id,
     p_owner_id:     user.id,
@@ -50,7 +50,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const rpc = supabase.rpc as unknown as GenericRpc;
+  const rpc = supabase.rpc.bind(supabase) as unknown as GenericRpc;
   const { error } = await rpc('delete_menu_item', {
     p_item_id:  params.id,
     p_owner_id: user.id,

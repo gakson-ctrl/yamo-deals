@@ -30,7 +30,7 @@ export async function PATCH(
 
   const { action, prep_time_min, new_status } = body;
   const orderId = params.id;
-  const rpc = supabase.rpc as unknown as GenericRpc;
+  const rpc = supabase.rpc.bind(supabase) as unknown as GenericRpc;
 
   try {
     if (action === 'accept') {

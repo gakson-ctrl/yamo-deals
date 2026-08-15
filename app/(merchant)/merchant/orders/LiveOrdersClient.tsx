@@ -87,12 +87,11 @@ export function LiveOrdersClient({ restaurantId, initialOrders }: LiveOrdersClie
             return;
           }
 
-          // Re-fetch with joins
+          // Re-fetch with joins (no profiles join — RLS blocks merchant reading customer profiles)
           const { data } = await (supabase.from('orders') as ReturnType<typeof supabase.from>)
             .select(`
               id, status, total_amount, delivery_fee, created_at,
               prep_time_min, note_to_kitchen, customer_id,
-              profiles(display_name),
               order_items(id, name, unit_price, quantity)
             `)
             .eq('id', orderId)

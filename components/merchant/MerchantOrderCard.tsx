@@ -14,7 +14,7 @@ export interface MerchantOrder {
   prep_time_min: number | null;
   note_to_kitchen: string | null;
   customer_id: string;
-  profiles: { display_name: string } | null;
+  profiles?: { display_name: string } | null;
   order_items: Array<{ id: string; name: string; quantity: number; unit_price: number }>;
 }
 

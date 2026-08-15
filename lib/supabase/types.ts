@@ -4,6 +4,14 @@
  * Replace with the generated output after `supabase db push`.
  */
 
+export interface SavedAddress {
+  id: string;
+  street: string;
+  district: string;
+  instructions?: string;
+  is_default: boolean;
+}
+
 export type OrderStatus =
   | 'pending'
   | 'accepted'
@@ -26,6 +34,7 @@ export interface Database {
           role: UserRole;
           avatar_url: string | null;
           locale: 'fr' | 'en';
+          saved_addresses: SavedAddress[];
           created_at: string;
         };
         Insert: {
@@ -35,6 +44,7 @@ export interface Database {
           role?: UserRole;
           avatar_url?: string | null;
           locale?: 'fr' | 'en';
+          saved_addresses?: SavedAddress[];
         };
         Update: {
           phone?: string;
@@ -42,6 +52,7 @@ export interface Database {
           role?: UserRole;
           avatar_url?: string | null;
           locale?: 'fr' | 'en';
+          saved_addresses?: SavedAddress[];
         };
         Relationships: [];
       };

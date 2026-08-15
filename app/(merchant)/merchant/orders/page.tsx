@@ -15,24 +15,27 @@ export default async function MerchantOrdersPage() {
   const { data: rawRestaurant } = await (supabase.from('restaurants') as ReturnType<typeof supabase.from>)
     .select('id')
     .eq('owner_id', user.id)
-    .single() as { data: { id: string } | null; error: unknown };
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle() as { data: { id: string } | null; error: unknown };
 
   if (!rawRestaurant) redirect('/merchant');
 
-  // Initial fetch — active orders only (not delivered / cancelled)
-  const { data: rawOrders } = await (supabase.from('orders') as ReturnType<typeof supabase.from>)
+  // Initial fetch — active orders only
+  const { data: rawOrders, error: ordersError } = await (supabase.from('orders') as ReturnType<typeof supabase.from>)
     .select(`
       id, status, total_amount, delivery_fee, created_at,
       prep_time_min, note_to_kitchen, customer_id,
-      profiles(display_name),
       order_items(id, name, unit_price, quantity)
     `)
     .eq('restaurant_id', rawRestaurant.id)
-    .not('status', 'in', '(delivered,cancelled)')
+    .in('status', ['pending', 'accepted', 'preparing', 'ready'])
     .order('created_at', { ascending: false }) as {
       data: MerchantOrder[] | null;
-      error: unknown;
+      error: { message: string } | null;
     };
+
+  if (ordersError) console.error('[merchant/orders] fetch failed:', ordersError.message);
 
   return (
     <LiveOrdersClient

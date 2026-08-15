@@ -288,7 +288,7 @@ INSERT INTO menu_items (
  'a0000000-0000-4000-8000-000000000002', 'b0000000-0000-4000-8000-000000000005',
  'Piment maison',
  'Petit pot de piment pilé aux oignons et à l''huile, préparé chaque matin.',
- 500, 'https://images.unsplash.com/photo-1583576515220-4a0a0b1b3f3e?w=600&q=80', true),
+ 500, 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=600&q=80', true),
 
 -- ===== Soya King Mvog-Ada · Boissons =====
 ('c0000000-0000-4000-8000-000000000018',

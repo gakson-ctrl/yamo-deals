@@ -38,16 +38,36 @@ export async function getRestaurantById(id: string): Promise<Restaurant | null> 
   return data;
 }
 
+/**
+ * Returns the owner's primary (oldest) restaurant, or null.
+ * Uses limit(1)+maybeSingle so it never throws when an owner has
+ * multiple restaurants (e.g. the demo merchant owns all 8).
+ */
 export async function getRestaurantByOwner(ownerId: string): Promise<Restaurant | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('restaurants')
     .select('*')
     .eq('owner_id', ownerId)
-    .single();
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
   if (error) return null;
   return data;
+}
+
+/** Returns all restaurants owned by a merchant (newest first). */
+export async function getRestaurantsByOwner(ownerId: string): Promise<Restaurant[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
 }
 
 // ─── Menu ─────────────────────────────────────────────────────────────────────

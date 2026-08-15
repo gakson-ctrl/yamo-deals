@@ -44,6 +44,19 @@ export const formatTime = (
 };
 
 /**
+ * formatDateTime — date + time, e.g. "11 août 2026 à 14:32" (FR) / "Aug 11, 2026 at 2:32 PM" (EN)
+ */
+export const formatDateTime = (
+  date: string | Date,
+  locale: 'fr' | 'en' = 'fr',
+): string => {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const dateStr = formatDate(d, locale);
+  const timeStr = formatTime(d, locale);
+  return locale === 'fr' ? `${dateStr} à ${timeStr}` : `${dateStr} at ${timeStr}`;
+};
+
+/**
  * formatPrepTime — "~25 min"
  */
 export const formatPrepTime = (minutes: number): string => `~${minutes} min`;

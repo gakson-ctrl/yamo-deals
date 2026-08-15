@@ -25,7 +25,9 @@ export default async function MenuPage() {
   const { data: restaurant } = await (supabase.from('restaurants') as ReturnType<typeof supabase.from>)
     .select('id, name')
     .eq('owner_id', user.id)
-    .single() as { data: { id: string; name: string } | null; error: unknown };
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle() as { data: { id: string; name: string } | null; error: unknown };
 
   if (!restaurant) redirect('/merchant');
 

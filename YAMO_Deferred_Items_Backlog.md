@@ -124,4 +124,52 @@
 
 ---
 
-*Last updated: 11 August 2026 — S7 complete (Menu Manager: add/edit items + categories, photo upload, availability toggle)*
+---
+
+## S8 — Search + Filters notes
+
+| # | Item | Type | Notes |
+|---|---|---|---|
+| Y-039 | Search is client-side only — no full-text DB index | Known limitation | Filters against the in-memory restaurant list fetched on mount. Acceptable for MVP (≤50 restaurants). For Phase 2: add `pg_trgm` index on `restaurants.name` and use Supabase full-text search. |
+| Y-040 | Home search bar navigates on every keystroke | UX quirk | `HomeSearchInput` calls `router.push()` on `onChange`. On fast typing, multiple navigation events fire. Consider debounce in Phase 2. |
+
+---
+
+## ✅ Resolved (continued)
+
+| # | Item | Resolved in | How |
+|---|---|---|---|
+| Y-012 | Restaurant search (basic, no map) | S8 | `SearchPageClient.tsx` — text search on name + category strings, client-side filtering |
+| — | Search page with filter chips | S8 | `app/(customer)/customer/search/page.tsx` + `SearchPageClient.tsx`; cuisine × 7, rating × 3, fee × 3, open now toggle; AND logic; reset button |
+| — | Skeleton loading (2-col × 3-row) | S8 | `SkeletonCard` component with `animate-pulse`; shown while Supabase fetch resolves |
+| — | Home search bar wired | S8 | `HomeSearchInput.tsx` client component; navigates to `/customer/search?q=…` on input; search page reads `?q` and pre-fills |
+| — | URL sync for shareable search links | S8 | `router.replace` keeps `?q` param in sync; `useSearchParams` pre-fills on load |
+
+---
+
+---
+
+## S9 — Profile + Address + History + Merchant Fix notes
+
+| # | Item | Type | Notes |
+|---|---|---|---|
+| Y-041 | Merchant orders not displaying (Y-036 was mislabelled) | Bug fix | Root cause: `profiles(display_name)` join in orders query tripped RLS; merchant cannot read customer profiles. Fix: removed profiles join from both server query (`orders/page.tsx`) and Realtime refetch (`LiveOrdersClient.tsx`); switched `.not('status','in',…)` to explicit `.in('status',[…])`. MerchantOrderCard already handled `profiles: null` with customer_id fallback. |
+| Y-042 | Profile page `saved_addresses` requires migration 0007 to be applied | Setup step | Run `supabase/migrations/0007_profile_addresses.sql` via Dashboard SQL Editor or `supabase db push`. Until applied, profile page will show empty address list. |
+| Y-043 | Review page `/customer/review/[order_id]` not yet implemented | Deferred feature | S11 scope. "Laisser un avis" CTA links to this route; page returns 404 until S11. |
+| Y-044 | Profile page: display_name edit not implemented | Deferred feature | Editing the display name on the profile page is out of scope for S9. PATCH /api/profile supports it — just needs a UI form. Phase 2 or S10. |
+
+---
+
+## ✅ Resolved (continued)
+
+| # | Item | Resolved in | How |
+|---|---|---|---|
+| Y-041 | Merchant orders not displaying | S9 | Removed `profiles(display_name)` from orders queries; RLS blocks merchant from reading customer profiles. Customer ID fallback already in place. |
+| — | Customer profile page | S9 | `app/(customer)/customer/profile/page.tsx` + `ProfileClient.tsx`; avatar, name, phone, addresses sheet, orders link, FR/EN toggle, logout confirm |
+| — | Address book (AddressSheet) | S9 | `components/customer/AddressSheet.tsx`; CRUD on `saved_addresses` JSONB via `PATCH /api/profile`; set-default, inline delete confirm |
+| — | Profile + addresses API route | S9 | `app/api/profile/route.ts` — GET + PATCH (auth-guarded, own profile only, direct `profiles` table update) |
+| — | Migration 0007 — saved_addresses column | S9 | `supabase/migrations/0007_profile_addresses.sql`; ALTER TABLE profiles ADD COLUMN saved_addresses |
+| — | Order history: date+time display | S9 | `formatDateTime` added to `lib/format.ts`; orders page shows "11 août 2026 à 14:32" |
+| — | Order history: "Laisser un avis" CTA | S9 | Appears on delivered orders alongside reorder button; links to `/customer/review/[order_id]` (S11 placeholder) |
+
+*Last updated: 15 August 2026 — S9 complete (Profile, Address book, Order history improvements, Merchant orders fix)*

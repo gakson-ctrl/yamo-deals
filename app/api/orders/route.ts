@@ -31,9 +31,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Cast needed: hand-written DB types cause rpc() args to resolve as undefined.
+  // .bind(supabase) is REQUIRED — a detached supabase.rpc loses its `this`
+  // binding and throws "Cannot read properties of undefined (reading 'rest')".
   type RpcResult<T> = Promise<{ data: T | null; error: { message: string } | null }>;
   type GenericRpc = (fn: string, args?: Record<string, unknown>) => RpcResult<unknown>;
-  const rpc = supabase.rpc as unknown as GenericRpc;
+  const rpc = supabase.rpc.bind(supabase) as unknown as GenericRpc;
 
   const { data, error } = await rpc('place_order', {
     p_customer_id: user.id,

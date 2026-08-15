@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { IconSearch, IconMapPin } from '@tabler/icons-react';
+import { IconMapPin } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/server';
 import { HomeClient } from '@/app/(customer)/components/HomeClient';
+import { HomeSearchInput } from '@/app/(customer)/components/HomeSearchInput';
 
 export const metadata: Metadata = { title: 'Accueil' };
 
@@ -36,17 +36,8 @@ export default async function CustomerHomePage() {
           {t('hero_subtitle')}
         </p>
 
-        {/* Search bar shortcut */}
-        <Link
-          href="/customer/search"
-          className="flex items-center gap-2 bg-yamo-white rounded-yamo-input px-3 py-2.5 shadow-sm"
-          aria-label={t('search_placeholder')}
-        >
-          <IconSearch size={16} className="text-yamo-ash" aria-hidden />
-          <span className="font-inter text-yamo-ash text-sm">
-            {t('search_placeholder')}
-          </span>
-        </Link>
+        {/* Search bar — navigates to /customer/search?q=… as user types */}
+        <HomeSearchInput />
       </header>
 
       {/* ── Interactive section (category pills + restaurant lists) ── */}

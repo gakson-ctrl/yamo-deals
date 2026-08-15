@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
   }
 
-  const rpc = supabase.rpc as unknown as GenericRpc;
+  const rpc = supabase.rpc.bind(supabase) as unknown as GenericRpc;
   const { data, error } = await rpc('insert_menu_category', {
     p_restaurant_id: body.restaurant_id,
     p_owner_id:      user.id,

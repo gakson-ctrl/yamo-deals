@@ -11,7 +11,7 @@
  * Cash on delivery is the only active payment method in the MVP.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -42,11 +42,16 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // True once an order is placed — prevents the empty-cart redirect below
+  // from racing (and beating) the navigation to the confirmation page.
+  const orderPlacedRef = useRef(false);
+
   useEffect(() => { setMounted(true); }, []);
 
-  // Redirect to home when cart is empty (after hydration)
+  // Redirect to home when cart is empty (after hydration) — but NOT when the
+  // cart was just cleared because an order was successfully placed.
   useEffect(() => {
-    if (mounted && items.length === 0) {
+    if (mounted && items.length === 0 && !orderPlacedRef.current) {
       router.replace('/customer');
     }
   }, [mounted, items.length, router]);
@@ -81,8 +86,11 @@ export default function CheckoutPage() {
         return;
       }
 
-      clearCart();
+      // Mark placed BEFORE clearing the cart, so the empty-cart effect skips
+      // its redirect and we land on the confirmation page.
+      orderPlacedRef.current = true;
       router.push(`/customer/confirmation/${data.order_id}`);
+      clearCart();
     } catch {
       setError(tCommon('error'));
     } finally {

@@ -24,7 +24,9 @@ export default async function MerchantDashboardPage() {
   const { data: rawRestaurant } = await (supabase.from('restaurants') as ReturnType<typeof supabase.from>)
     .select('id, name, is_open')
     .eq('owner_id', user.id)
-    .single() as { data: RawRestaurant | null; error: unknown };
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle() as { data: RawRestaurant | null; error: unknown };
 
   if (!rawRestaurant) {
     return (

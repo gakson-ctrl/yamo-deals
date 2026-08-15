@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { IconShoppingBag, IconRotate } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useCartStore } from '@/lib/cart-store';
-import { formatFCFA, formatDate } from '@/lib/format';
+import { formatFCFA, formatDateTime } from '@/lib/format';
 
 type OrderStatus =
   | 'pending' | 'accepted' | 'preparing' | 'ready'
@@ -168,7 +168,7 @@ export default function OrderHistoryPage() {
                     {/* Date + total */}
                     <div className="flex items-center justify-between">
                       <span className="font-inter text-xs text-yamo-ash">
-                        {formatDate(order.created_at, locale)}
+                        {formatDateTime(order.created_at, locale)}
                       </span>
                       <span className="font-sora font-semibold text-sm text-yamo-mango-dark">
                         {formatFCFA(grandTotal)}
@@ -176,21 +176,37 @@ export default function OrderHistoryPage() {
                     </div>
                   </Link>
 
-                  {/* Reorder CTA — outside the Link to avoid nested interactive elements */}
-                  {order.status === 'delivered' && order.order_items.length > 0 && (
-                    <button
-                      onClick={() => handleReorder(order)}
-                      className="
-                        mt-1.5 w-full h-9 rounded-yamo-pill
-                        border border-yamo-red text-yamo-red
-                        font-sora font-semibold text-xs
-                        flex items-center justify-center gap-1.5
-                        hover:bg-yamo-red-light transition-colors
-                      "
-                    >
-                      <IconRotate size={14} />
-                      {t('reorder')}
-                    </button>
+                  {/* CTAs for delivered orders — outside the Link to avoid nesting */}
+                  {order.status === 'delivered' && (
+                    <div className="flex gap-2 mt-1.5">
+                      {order.order_items.length > 0 && (
+                        <button
+                          onClick={() => handleReorder(order)}
+                          className="
+                            flex-1 h-9 rounded-yamo-pill
+                            border border-yamo-red text-yamo-red
+                            font-sora font-semibold text-xs
+                            flex items-center justify-center gap-1.5
+                            hover:bg-yamo-red-light transition-colors
+                          "
+                        >
+                          <IconRotate size={14} />
+                          {t('reorder')}
+                        </button>
+                      )}
+                      <Link
+                        href={`/customer/review/${order.id}`}
+                        className="
+                          flex-1 h-9 rounded-yamo-pill
+                          bg-yamo-red-light text-yamo-red
+                          font-sora font-semibold text-xs
+                          flex items-center justify-center
+                          hover:bg-yamo-red hover:text-white transition-colors
+                        "
+                      >
+                        {t('leave_review')}
+                      </Link>
+                    </div>
                   )}
                 </li>
               );

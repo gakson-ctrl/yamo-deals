@@ -23,7 +23,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'is_open (boolean) requis' }, { status: 400 });
   }
 
-  const rpc = supabase.rpc as unknown as GenericRpc;
+  const rpc = supabase.rpc.bind(supabase) as unknown as GenericRpc;
   const { error } = await rpc('toggle_restaurant_status', {
     p_restaurant_id: params.id,
     p_owner_id:      user.id,
