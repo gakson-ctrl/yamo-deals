@@ -23,13 +23,14 @@ export function HomeClient({ restaurants }: HomeClientProps) {
     [restaurants, activeCategory],
   );
 
+  // Derive from `filtered` so the category pill also scopes the top-rated section
   const topRated = useMemo(
     () =>
-      [...restaurants]
+      [...filtered]
         .filter((r) => r.rating != null && r.rating > 0)
         .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
         .slice(0, 6),
-    [restaurants],
+    [filtered],
   );
 
   return (

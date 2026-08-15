@@ -59,10 +59,18 @@
 | Y-015 | Photo CDN migration from Supabase Storage | Technical debt | Pre-S0 | Supabase Storage fine for MVP; move to CDN at scale |
 | Y-024 | Real food photos — all placeholders are gradients | Deferred feature | S2 | Visual polish; restaurant cover + menu item photos need real images |
 | Y-025 | Avis + Infos tabs on restaurant page — placeholder only | Deferred feature | S2 | "Bientôt disponible" shown; wire in S10 reviews session |
-| ~~Y-026~~ | ~~Checkout delivery address — no map picker~~ | ~~Deferred feature~~ | ~~S3~~ | Resolved: Yaoundé quartiers autocomplete (20 districts) + landmark/precision field added |
+| Y-026 | Checkout delivery address — no map picker | Deferred feature | S3 | Free text input only; Google Maps / OSM picker deferred to Phase 2 |
 | Y-027 | Order confirmation ETA hardcoded ("20–30 min") | Technical debt | S3 | Should compute from restaurant avg_prep_time + delivery estimate |
 | Y-028 | CartDrawer localStorage persistence excludes isDrawerOpen | Known limitation | S3 | Intentional — drawer state resets on reload; acceptable for MVP |
-| ~~Y-036~~ | ~~Merchant live orders not displaying~~ | ~~Bug~~ | ~~S5/S6~~ | Resolved: server page no longer redirects on null restaurant; LiveOrdersClient fetches orders client-side on mount as fallback; Realtime guards against empty restaurantId |
+| Y-036 | Merchant live orders not displaying despite correct owner_id + RLS policies | Bug | S5/S6 live test | Fixed in code fixes session — profiles join removed |
+| Y-037 | Register button says "Envoyer le code" implies OTP step that doesn't exist | UX | Cowork QA | Fix: change to "Créer mon compte" in fr.json |
+| Y-038 | Client role icon shows scooter 🛵 looks like tractor | Visual | Cowork QA | Fix: change to 👤 person icon |
+| ~~Y-039~~ | ~~Checkout CTA covered by bottom nav~~ | ~~🔴 CRITICAL~~ | ~~Cowork QA~~ | Resolved: layout is now a client component; usePathname() hides nav on /customer/checkout and /customer/confirmation/* |
+| ~~Y-040~~ | ~~"Les mieux notés" ignores category filter~~ | ~~UX~~ | ~~Cowork QA~~ | Resolved: topRated memo now derives from `filtered` instead of `restaurants` |
+| ~~Y-041~~ | ~~Bottom nav labels hardcoded French~~ | ~~UX~~ | ~~Cowork QA~~ | Resolved: layout uses useTranslations('nav') — nav.home/search/orders/profile keys already existed in both locales |
+| Y-042 | Restaurant cover images = placeholder initials (no cover_url in seed) | Visual | Cowork QA | Seed fix: add real Unsplash food images to seed.sql |
+| Y-043 | Menu thumbnails slow lazy-load + wrong images in seed (pasta for beignets) | Visual | Cowork QA | Seed fix: correct image URLs per restaurant |
+| Y-044 | "Passer la commande" CartDrawer button didn't navigate via click | UX | Cowork QA | Investigate: may be z-index or event propagation issue |
 | Y-035 | Checkout address field missing or hidden above fold on some screen sizes | Bug | S3 live test | Delivery address input not visible — needs investigation |
 
 ---
@@ -97,7 +105,6 @@
 | — | Browser tab title badge (🔴 N nouvelles) | S6 | Updates on Realtime INSERT; resets on accept |
 | — | Merchant order detail page | S6 | /merchant/orders/[id] with full items, timestamps, action buttons |
 | — | next.config.js image domains | S6-FIX | Added unsplash + supabase.co to remotePatterns |
-| — | SVG icons invisible: `<img>` ignores CSS `color`; `currentColor` defaults to black | CODE-FIX | Switched SpriteIcon to CSS `mask-image` approach — `backgroundColor: currentColor` painted through SVG alpha mask; all `text-*` color classes now work on icons |
 
 ---
 
