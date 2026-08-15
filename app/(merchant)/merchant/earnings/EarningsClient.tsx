@@ -155,9 +155,15 @@ export function EarningsClient({ restaurantName, orders }: Props) {
         </div>
       </div>
 
-      {/* Bar chart — last 7 days */}
+      {/* Bar chart — heading reflects active period */}
       <div className="bg-yamo-white rounded-yamo-card p-4 border border-yamo-fog mb-6">
-        <p className="font-inter text-xs font-semibold text-yamo-ash mb-3">{t('chart_title')}</p>
+        <p className="font-inter text-xs font-semibold text-yamo-ash mb-3">
+          {activePeriod === 'today'
+            ? t('chart_title_today')
+            : activePeriod === 'month'
+            ? t('chart_title_month')
+            : t('chart_title')}
+        </p>
         <div className="flex items-end gap-1.5 h-[100px]">
           {dailyData.map((day, i) => {
             const heightPct = Math.max((day.revenue / maxBarRevenue) * 100, day.revenue > 0 ? 6 : 2);
@@ -206,16 +212,20 @@ export function EarningsClient({ restaurantName, orders }: Props) {
         )}
       </div>
 
-      {/* Export CSV */}
-      {filteredOrders.length > 0 && (
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          className="w-full h-11 rounded-yamo-pill border-2 border-yamo-red text-yamo-red font-sora font-semibold text-sm hover:bg-yamo-red-light transition-colors"
-        >
-          ↓ {t('export')}
-        </button>
-      )}
+      {/* Export CSV — always visible; disabled with tooltip when no data */}
+      <button
+        type="button"
+        onClick={filteredOrders.length > 0 ? handleExportCSV : undefined}
+        disabled={filteredOrders.length === 0}
+        title={filteredOrders.length === 0 ? t('no_data') : undefined}
+        className={`w-full h-11 rounded-yamo-pill border-2 font-sora font-semibold text-sm transition-colors ${
+          filteredOrders.length > 0
+            ? 'border-yamo-red text-yamo-red hover:bg-yamo-red-light cursor-pointer'
+            : 'border-yamo-fog text-yamo-ash cursor-not-allowed opacity-50'
+        }`}
+      >
+        ↓ {t('export')}
+      </button>
 
     </div>
   );

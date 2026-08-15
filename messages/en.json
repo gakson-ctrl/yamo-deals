@@ -266,6 +266,8 @@
     "avg": "Avg. order",
     "export": "Export CSV",
     "chart_title": "Revenue — last 7 days",
+    "chart_title_today": "Today's revenue",
+    "chart_title_month": "Revenue — last 30 days",
     "recent_orders": "Recent orders",
     "no_data": "No orders in this period",
     "total_orders": "Total orders",

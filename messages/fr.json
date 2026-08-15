@@ -266,6 +266,8 @@
     "avg": "Panier moyen",
     "export": "Exporter CSV",
     "chart_title": "Revenus des 7 derniers jours",
+    "chart_title_today": "Revenus d'aujourd'hui",
+    "chart_title_month": "Revenus des 30 derniers jours",
     "recent_orders": "Dernières commandes",
     "no_data": "Aucune commande sur cette période",
     "total_orders": "Commandes totales",

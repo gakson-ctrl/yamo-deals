@@ -72,6 +72,12 @@
 | Y-043 | Menu thumbnails slow lazy-load + wrong images in seed (pasta for beignets) | Visual | Cowork QA | Seed fix: correct image URLs per restaurant |
 | Y-044 | "Passer la commande" CartDrawer button didn't navigate via click | UX | Cowork QA | Investigate: may be z-index or event propagation issue |
 | Y-035 | Checkout address field missing or hidden above fold on some screen sizes | Bug | S3 live test | Delivery address input not visible — needs investigation |
+| ~~Y-046~~ | ~~Order status badges show raw English~~ | ~~Bug~~ | ~~Cowork QA~~ | Resolved: STATUS_LABELS const in MerchantOrderCard.tsx replaces raw order.status render |
+| ~~Y-047~~ | ~~Accepted orders appear in "Nouvelles" tab~~ | ~~Bug~~ | ~~Cowork QA~~ | Resolved: TAB_STATUSES fixed — new=pending only; preparing=accepted+preparing; ready=ready+delivering |
+| ~~Y-048~~ | ~~Time-ago shows raw minutes (e.g. "5896 min il y a")~~ | ~~Bug~~ | ~~Cowork QA~~ | Resolved: formatTimeAgo() added to lib/format.ts — rolls up to h/j after 60/1440 min |
+| ~~Y-049~~ | ~~Earnings chart heading hardcoded "7 derniers jours"~~ | ~~Bug~~ | ~~Cowork QA~~ | Resolved: chart heading now derived from activePeriod using i18n chart_title_today/week/month |
+| ~~Y-050~~ | ~~CSV Export button disappears when no orders~~ | ~~Bug~~ | ~~Cowork QA~~ | Resolved: button always rendered; disabled+opacity-50 with no_data tooltip when filteredOrders empty |
+| ~~Y-052~~ | ~~Menu price format inconsistency~~ | ~~Bug~~ | ~~Cowork QA~~ | Resolved: MenuManagerClient already uses formatFCFA(item.price) — confirmed correct throughout |
 
 ---
 

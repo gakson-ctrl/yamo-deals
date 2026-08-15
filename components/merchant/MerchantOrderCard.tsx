@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { formatFCFA } from '@/lib/format';
+import { formatFCFA, formatTimeAgo } from '@/lib/format';
 import { PrepTimeModal } from './PrepTimeModal';
 import type { OrderStatus } from '@/lib/supabase/types';
 
@@ -24,6 +24,17 @@ interface MerchantOrderCardProps {
   onUpdateStatus: (orderId: string, newStatus: OrderStatus) => Promise<void>;
   onCancel: (orderId: string) => Promise<void>;
 }
+
+// French display labels for each order status — matches fr.json order.status_* values
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  pending:   'En attente',
+  accepted:  'Acceptée',
+  preparing: 'En préparation',
+  ready:     'Prête',
+  delivering:'En livraison',
+  delivered: 'Livrée',
+  cancelled: 'Annulée',
+};
 
 const STATUS_CHIP: Record<OrderStatus, string> = {
   pending:   'bg-yamo-mango-light text-amber-700',
@@ -63,10 +74,6 @@ export function MerchantOrderCard({
   const minutesAgo = Math.floor(
     (Date.now() - new Date(order.created_at).getTime()) / 60_000,
   );
-  const timeAgoStr =
-    minutesAgo < 1
-      ? `< 1 min ${t('time_ago')}`
-      : `${minutesAgo} min ${t('time_ago')}`;
   const timeColor = getTimeColor(minutesAgo);
 
   const grandTotal = Number(order.total_amount) + Number(order.delivery_fee);
@@ -93,14 +100,14 @@ export function MerchantOrderCard({
               {t('order_number')} #{order.id.slice(-6).toUpperCase()}
             </span>
             <p className={`font-inter text-xs mt-0.5 font-medium ${timeColor}`}>
-              {timeAgoStr}
+              {formatTimeAgo(order.created_at)}
             </p>
           </div>
           <span className={`
             rounded-yamo-chip px-2 py-1 text-xs font-inter font-semibold shrink-0 ml-2
             ${STATUS_CHIP[order.status]}
           `}>
-            {order.status}
+            {STATUS_LABELS[order.status]}
           </span>
         </div>
 

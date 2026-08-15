@@ -60,3 +60,17 @@ export const formatDateTime = (
  * formatPrepTime — "~25 min"
  */
 export const formatPrepTime = (minutes: number): string => `~${minutes} min`;
+
+/**
+ * formatTimeAgo — rolling elapsed-time string (FR).
+ * Rolls up from minutes → hours → days so the display never shows e.g. "5896 min".
+ */
+export const formatTimeAgo = (date: string | Date): string => {
+  const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60_000);
+  if (mins < 1) return "À l'instant";
+  if (mins < 60) return `Il y a ${mins} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Il y a ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `Il y a ${days}j`;
+};

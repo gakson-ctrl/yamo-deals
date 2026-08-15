@@ -11,10 +11,10 @@ import type { OrderStatus } from '@/lib/supabase/types';
 type Tab = 'new' | 'preparing' | 'ready' | 'all';
 
 const TAB_STATUSES: Record<Tab, OrderStatus[]> = {
-  new:       ['pending', 'accepted'],
-  preparing: ['preparing'],
-  ready:     ['ready'],
-  all:       ['pending', 'accepted', 'preparing', 'ready'],
+  new:       ['pending'],
+  preparing: ['accepted', 'preparing'],
+  ready:     ['ready', 'delivering'],
+  all:       ['pending', 'accepted', 'preparing', 'ready', 'delivering'],
 };
 
 interface LiveOrdersClientProps {
